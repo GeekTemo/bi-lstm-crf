@@ -1,4 +1,4 @@
-A Pytorch implementation of the BI-LSTM-CRF model.
+A PyTorch implementation of the BI-LSTM-CRF model.
 
 # Features:
 - General implementation of CRF module
@@ -15,13 +15,10 @@ A Pytorch implementation of the BI-LSTM-CRF model.
 # INSTALL
 - dependencies
     - Python 3
-    - [Pytorch](https://pytorch.org/)
+    - [PyTorch](https://pytorch.org/)
 - install
     ```sh
-    $ git clone https://github.com/jidasheng/bi-lstm-crf.git
-    $ pip install bi-lstm-crf/
-    
-    $ pip install bi-lstm-crf   # sometimes later
+    $ pip install bi-lstm-crf
     ```
 
 # TRAIN
