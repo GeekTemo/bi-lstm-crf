@@ -12,7 +12,7 @@ A PyTorch implementation of the BI-LSTM-CRF model.
 - Easy to train your own sequence tagging models
 - MIT License
 
-# INSTALL
+# Installation
 - dependencies
     - Python 3
     - [PyTorch](https://pytorch.org/)
@@ -21,14 +21,14 @@ A PyTorch implementation of the BI-LSTM-CRF model.
     $ pip install bi-lstm-crf
     ```
 
-# TRAIN
+# Training
 ### corpus
 - prepare your corpus in the specified [structure and format](https://github.com/jidasheng/bi-lstm-crf/wiki/corpus-structure-and-format). 
 - there is also a sample corpus in `bi_lstm_crf/app/sample_corpus`.
 
 
 ### train
-- training
+- shell
     ```sh
     $ python -m bi_lstm_crf corpus_dir --model_dir "model_xxx"
     ```
@@ -44,16 +44,16 @@ A PyTorch implementation of the BI-LSTM-CRF model.
         plt.show()
         ```
 
-# PREDICT
+# Prediction
 ```python
 from bi_lstm_crf.app import WordsTagger
 
-model = WordsTagger(model_dir)
+model = WordsTagger(model_dir="xxx")
 print(model(["市领导到成都..."]))  # CHAR-based model
 print(model([["市", "领导", "到", "成都", ...]]))  # WORD-based model
 ```
 
-# MODULES
+# Modules
 There modules are generally built and can be used in other projects
 - CRF
 - BiRnnCrf
