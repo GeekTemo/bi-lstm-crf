@@ -1,6 +1,6 @@
 import torch.nn as nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
-from bi_lstm_crf.model.crf import CRF
+from .crf import CRF
 
 
 class BiRnnCrf(nn.Module):
@@ -18,8 +18,7 @@ class BiRnnCrf(nn.Module):
         self.crf = CRF(hidden_dim, self.tagset_size)
 
     def __build_features(self, sentences):
-        # bs, sl = sentences.shape
-        masks = sentences.data.gt(0).float()
+        masks = sentences.gt(0)
         embeds = self.embedding(sentences.long())
 
         seq_length = masks.sum(1)
@@ -42,5 +41,5 @@ class BiRnnCrf(nn.Module):
     def forward(self, xs):
         # Get the emission scores from the BiLSTM
         features, masks = self.__build_features(xs)
-        score, tag_seq = self.crf(features, masks)
-        return score, tag_seq
+        scores, tag_seq = self.crf(features, masks)
+        return scores, tag_seq

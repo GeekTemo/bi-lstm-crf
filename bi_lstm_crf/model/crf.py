@@ -20,21 +20,21 @@ class CRF(nn.Module):
     :param num_tag: number of tags. DO NOT include START, STOP tags, they are included internal.
     """
 
-    def __init__(self, in_features, num_tag):
+    def __init__(self, in_features, num_tags):
         super(CRF, self).__init__()
 
-        self.num_tag = num_tag + 2
-        self.start_idx = self.num_tag - 2
-        self.stop_idx = self.num_tag - 1
+        self.num_tags = num_tags + 2
+        self.start_idx = self.num_tags - 2
+        self.stop_idx = self.num_tags - 1
 
-        self.fc = nn.Linear(in_features, self.num_tag)
+        self.fc = nn.Linear(in_features, self.num_tags)
 
         # transition factor, Tij mean transition from j to i
-        self.transitions = nn.Parameter(torch.randn(self.num_tag, self.num_tag), requires_grad=True)
+        self.transitions = nn.Parameter(torch.randn(self.num_tags, self.num_tags), requires_grad=True)
         self.transitions.data[self.start_idx, :] = IMPOSSIBLE
         self.transitions.data[:, self.stop_idx] = IMPOSSIBLE
 
-    def forward(self, features, masks=None):
+    def forward(self, features, masks):
         """decode tags
 
         :param features: [B, L, C], batch of unary scores
@@ -44,9 +44,9 @@ class CRF(nn.Module):
             best_paths: [B, L]
         """
         features = self.fc(features)
-        return self.__viterbi_decode(features, masks[:, :features.size(1)])
+        return self.__viterbi_decode(features, masks[:, :features.size(1)].float())
 
-    def loss(self, features, ys, masks=None):
+    def loss(self, features, ys, masks):
         """negative log likelihood loss
         B: batch size, L: sequence length, D: dimension
 
@@ -58,7 +58,7 @@ class CRF(nn.Module):
         features = self.fc(features)
 
         L = features.size(1)
-        masks_ = masks[:, :L]
+        masks_ = masks[:, :L].float()
 
         forward_score = self.__forward_algorithm(features, masks_)
         gold_score = self.__score_sentence(features, ys[:, :L].long(), masks_)

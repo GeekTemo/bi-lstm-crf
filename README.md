@@ -1,13 +1,13 @@
 A PyTorch implementation of the BI-LSTM-CRF model.
 
 # Features:
-- General implementation of CRF module
-    - Full vectorized implementation: 1) no "for loop" in score sentence algorithm; 2) single level "for loop" in viterbi and forward algorithm
-    - START/STOP tags are automatically added in CRF
-    - A inner Linear Layer is included which transform from features space to tag space
-- General implementation of BI-LSTM-CRF model
-- CUDA supported
-- Full support for batch computation: training, predicting
+- Compared with [PyTorch BI-LSTM-CRF tutorial][1], following improvements are performed:
+    - Full support for mini-batch computation
+    - Full vectorized implementation. Specially, removing all loops in "score sentence" algorithm, which dramatically improve training performance
+    - CUDA supported
+    - Very simple API of CRF module
+        - START/STOP tags are automatically added in CRF
+        - A inner Linear Layer is included which transform from features space to tag space
 - Specialized for NLP sequence tagging tasks
 - Easy to train your own sequence tagging models
 - MIT License
@@ -15,7 +15,7 @@ A PyTorch implementation of the BI-LSTM-CRF model.
 # Installation
 - dependencies
     - Python 3
-    - [PyTorch](https://pytorch.org/)
+    - [PyTorch][5]
 - install
     ```sh
     $ pip install bi-lstm-crf
@@ -23,26 +23,25 @@ A PyTorch implementation of the BI-LSTM-CRF model.
 
 # Training
 ### corpus
-- prepare your corpus in the specified [structure and format](https://github.com/jidasheng/bi-lstm-crf/wiki/corpus-structure-and-format). 
-- there is also a sample corpus in `bi_lstm_crf/app/sample_corpus`.
+- prepare your corpus in the specified [structure and format][2]
+- there is also a sample corpus in [`bi_lstm_crf/app/sample_corpus`][3]
 
+### training
+```sh
+$ python -m bi_lstm_crf corpus_dir --model_dir "model_xxx"
+```
+- more [options][4]
 
-### train
-- shell
-    ```sh
-    $ python -m bi_lstm_crf corpus_dir --model_dir "model_xxx"
-    ```
-    - more [options](https://github.com/jidasheng/bi-lstm-crf/wiki/training-options)
-- training results
-    - the training results are saved in the model_dir, you can load and draw loss curve
-        ```python
-        import pandas as pd
-        import matplotlib.pyplot as plt
-        
-        df = pd.read_csv(".../model_dir/loss.csv")
-        df[["train_loss", "val_loss"]].ffill().plot(grid=True)
-        plt.show()
-        ```
+### training curve
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# the training losses are saved in the model_dir
+df = pd.read_csv(".../model_dir/loss.csv")
+df[["train_loss", "val_loss"]].ffill().plot(grid=True)
+plt.show()
+```
 
 # Prediction
 ```python
@@ -50,14 +49,43 @@ from bi_lstm_crf.app import WordsTagger
 
 model = WordsTagger(model_dir="xxx")
 print(model(["市领导到成都..."]))  # CHAR-based model
+# [['市', '领导', '到', ('成都', 'LOC'), ...]]
+
 print(model([["市", "领导", "到", "成都", ...]]))  # WORD-based model
 ```
 
-# Modules
-There modules are generally built and can be used in other projects
-- CRF
-- BiRnnCrf
+# CRF Module
+The CRF module can be easily embeded into other models:
+```python
+# a BERT-CRF model for sequence tagging
+from bi_lstm_crf import CRF
+
+class BertCrf(nn.Module):
+    def __init__(self, ...):
+        ...
+        self.bert = BERT(...)
+        self.crf = CRF(in_features, num_tags)
+        
+    def loss(self, xs, tags):
+        features, = self.bert(xs)
+        masks = xs.gt(0)
+        loss = self.crf.loss(features, tags, masks)
+        return loss
+        
+    def forward(self, xs):
+        features, = self.bert(xs)
+        masks = xs.gt(0)
+        scores, tag_seq = self.crf(features, masks)
+        return scores, tag_seq
+```
 
 # References
-- [Zhiheng Huang, Wei Xu, and Kai Yu. 2015. Bidirectional LSTM-CRF Models for Sequence Tagging](https://arxiv.org/abs/1508.01991). arXiv:1508.01991.
-- Pytorch tutorial [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF](https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html)
+1. [Zhiheng Huang, Wei Xu, and Kai Yu. 2015. Bidirectional LSTM-CRF Models for Sequence Tagging][6]. arXiv:1508.01991.
+2. PyTorch tutorial [ADVANCED: MAKING DYNAMIC DECISIONS AND THE BI-LSTM CRF][1]
+
+[1]:https://pytorch.org/tutorials/beginner/nlp/advanced_tutorial.html
+[2]:https://github.com/jidasheng/bi-lstm-crf/wiki/corpus-structure-and-format
+[3]:https://github.com/jidasheng/bi-lstm-crf/tree/master/bi_lstm_crf/app/sample_corpus
+[4]:https://github.com/jidasheng/bi-lstm-crf/wiki/training-options
+[5]:https://pytorch.org/
+[6]:https://arxiv.org/abs/1508.01991
