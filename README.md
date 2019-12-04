@@ -5,7 +5,7 @@ A PyTorch implementation of the BI-LSTM-CRF model.
     - Full support for mini-batch computation
     - Full vectorized implementation. Specially, removing all loops in "score sentence" algorithm, which dramatically improve training performance
     - CUDA supported
-    - Very simple API of CRF module
+    - Very simple APIs for [CRF module](#CRF)
         - START/STOP tags are automatically added in CRF
         - A inner Linear Layer is included which transform from features space to tag space
 - Specialized for NLP sequence tagging tasks
@@ -54,7 +54,7 @@ print(model(["市领导到成都..."]))  # CHAR-based model
 print(model([["市", "领导", "到", "成都", ...]]))  # WORD-based model
 ```
 
-# CRF Module
+# <a id="CRF">CRF Module
 The CRF module can be easily embeded into other models:
 ```python
 # a BERT-CRF model for sequence tagging
