@@ -128,7 +128,7 @@ class Preprocessor:
                         raise ValueError('"sentence length({})" != "tags length({})" in line {}"'.format(
                             len(sentence), len(tags), idx + 1))
                 except Exception as e:
-                    raise ValueError("exception raised when parsing line {}\n {}".format(idx + 1, e))
+                    raise ValueError("exception raised when parsing line {}\n\t{}\n\t{}".format(idx + 1, line, e))
 
         xs, ys = np.asarray(xs), np.asarray(ys)
 

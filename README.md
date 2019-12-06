@@ -7,7 +7,7 @@ A PyTorch implementation of the BI-LSTM-CRF model.
     - CUDA supported
     - Very simple APIs for [CRF module](#CRF)
         - START/STOP tags are automatically added in CRF
-        - A inner Linear Layer is included which transform from features space to tag space
+        - A inner Linear Layer is included which transform from feature space to tag space
 - Specialized for NLP sequence tagging tasks
 - Easy to train your own sequence tagging models
 - MIT License
@@ -31,6 +31,7 @@ A PyTorch implementation of the BI-LSTM-CRF model.
 $ python -m bi_lstm_crf corpus_dir --model_dir "model_xxx"
 ```
 - more [options][4]
+- [detail of model_dir][7]
 
 ### training curve
 ```python
@@ -48,30 +49,33 @@ plt.show()
 from bi_lstm_crf.app import WordsTagger
 
 model = WordsTagger(model_dir="xxx")
-print(model(["市领导到成都..."]))  # CHAR-based model
+tags, sequences = model(["市领导到成都..."])  # CHAR-based model
+print(tags)  
+# [["B", "B", "I", "B", "B-LOC", "I-LOC", "I-LOC", "I-LOC", "I-LOC", "B", "I", "B", "I"]]
+print(sequences)
 # [['市', '领导', '到', ('成都', 'LOC'), ...]]
 
-print(model([["市", "领导", "到", "成都", ...]]))  # WORD-based model
+# model([["市", "领导", "到", "成都", ...]])  # WORD-based model
 ```
 
 # <a id="CRF">CRF Module
 The CRF module can be easily embeded into other models:
 ```python
-# a BERT-CRF model for sequence tagging
 from bi_lstm_crf import CRF
 
+# a BERT-CRF model for sequence tagging
 class BertCrf(nn.Module):
     def __init__(self, ...):
         ...
         self.bert = BERT(...)
         self.crf = CRF(in_features, num_tags)
-        
+
     def loss(self, xs, tags):
         features, = self.bert(xs)
         masks = xs.gt(0)
         loss = self.crf.loss(features, tags, masks)
         return loss
-        
+
     def forward(self, xs):
         features, = self.bert(xs)
         masks = xs.gt(0)
@@ -89,3 +93,4 @@ class BertCrf(nn.Module):
 [4]:https://github.com/jidasheng/bi-lstm-crf/wiki/training-options
 [5]:https://pytorch.org/
 [6]:https://arxiv.org/abs/1508.01991
+[7]:https://github.com/jidasheng/bi-lstm-crf/wiki/details-of-model_dir
