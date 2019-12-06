@@ -18,10 +18,11 @@ class WordsTagger:
 
         self.model.eval()
 
-    def __call__(self, sentences):
+    def __call__(self, sentences, begin_tags="BS"):
         """predict texts
 
         :param sentences: a text or a list of text
+        :param begin_tags: begin tags for the beginning of a span
         :return:
         """
         if not isinstance(sentences, (list, tuple)):
@@ -36,23 +37,24 @@ class WordsTagger:
         except RuntimeError as e:
             print("*** runtime error: {}".format(e))
             raise e
-        return self.tokens_from_tags(sentences, tags)
+        return tags, self.tokens_from_tags(sentences, tags, begin_tags=begin_tags)
 
     @staticmethod
-    def tokens_from_tags(sentences, tags_list):
+    def tokens_from_tags(sentences, tags_list, begin_tags):
         """extract entities from tags
 
         :param sentences: a list of sentence
         :param tags_list: a list of tags
+        :param begin_tags:
         :return:
         """
         if not tags_list:
             return []
 
         def _tokens(sentence, ts):
-            begins = [(idx, t[2:]) for idx, t in enumerate(ts) if t[0] in "BS"] + [(len(ts), "O")]
+            begins = [(idx, t[2:]) for idx, t in enumerate(ts) if t[0] in begin_tags] + [(len(ts), "O")]
             if begins[0][0] != 0:
-                print('warning: tags does begin with "B" or "S": \n{}\n{}'.format(sentence, ts))
+                print('warning: tags does begin with any of {}: \n{}\n{}'.format(begin_tags, sentence, ts))
                 begins.insert(0, (0, 0))
 
             tokens_ = [(sentence[s:e], tag) for (s, tag), (e, _) in zip(begins[:-1], begins[1:])]
